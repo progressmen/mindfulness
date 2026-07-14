@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正念</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111111;
+      --text: #e8e6e3;
+      --text-secondary: #6b6b6b;
+      --accent: #c9a87c;
+      --accent-dim: rgba(201,168,124,0.12);
+      --border: rgba(201,168,124,0.18);
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === 页面 === */
+    .page {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      padding: 20px 24px 24px;
+      overflow-y: auto;
+      animation: fadeIn 0.5s ease;
+    }
+    .page.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === 导航 === */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .nav-title {
+      font-size: 16px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      color: var(--accent);
+    }
+    .nav-back {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      letter-spacing: 2px;
+      transition: color 0.3s;
+      padding: 4px 8px;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-placeholder { width: 60px; }
+
+    /* === 首页 === */
+    .home-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quote-section {
+      text-align: center;
+      padding: 36px 16px 28px;
+      flex-shrink: 0;
+    }
+    .quote-text {
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+    .quote-author {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: 3px;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 200;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      letter-spacing: 2px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: auto;
+      padding-bottom: 8px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      transform: translateY(-3px);
+    }
+    .card-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+    .card-title {
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: 2px;
+      font-weight: 400;
+    }
+    .card-desc {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 5px;
+      letter-spacing: 1px;
+    }
+
+    /* === 呼吸练习 === */
+    .breath-options {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0 28px;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .breath-option {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      flex: 1;
+    }
+    .breath-option.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .breath-option-name {
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: 2px;
+    }
+    .breath-option-detail {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 5px;
+      letter-spacing: 1px;
+    }
+
+    .breath-visual {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 200px;
+    }
+    .breath-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.1s linear, box-shadow 0.3s;
+      box-shadow: 0 0 30px rgba(201,168,124,0.05);
+    }
+    .breath-circle-inner {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,124,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .breath-label {
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 4px;
+    }
+    .breath-timer {
+      font-size: 32px;
+      font-weight: 200;
+      color: var(--text);
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .breath-instruction {
+      margin-top: 32px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    .breath-controls {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      padding: 20px 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* === 冥想计时器 === */
+    .meditation-setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 20px;
+      padding: 20px 0;
+    }
+    .time-selector {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      max-width: 280px;
+    }
+    .time-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+      min-width: 56px;
+    }
+    .time-btn:hover, .time-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .time-display {
+      font-size: 44px;
+      font-weight: 200;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 4px;
+    }
+
+    .meditation-timer-display {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+    .timer-ring {
+      position: relative;
+      width: 220px;
+      height: 220px;
+    }
+    .timer-ring svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+    .timer-ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 1.5;
+    }
+    .timer-ring-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+    }
+    .timer-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 38px;
+      font-weight: 200;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+    }
+    .timer-controls {
+      display: flex;
+      gap: 16px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    /* === 心情记录 === */
+    .mood-section-title {
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: 3px;
+      margin: 8px 0 12px;
+      text-align: center;
+    }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 4px 0 20px;
+      flex-shrink: 0;
+    }
+    .mood-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 26px;
+    }
+    .mood-item:hover, .mood-item.selected {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      transform: scale(1.06);
+    }
+    .mood-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
+
+    .stats-section {
+      margin-top: 4px;
+      padding: 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .stats-title {
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .streak-number {
+      font-size: 42px;
+      font-weight: 200;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .streak-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .calendar-section {
+      margin-top: 16px;
+      flex-shrink: 0;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      background: transparent;
+    }
+    .calendar-day.weekday {
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      opacity: 0.6;
+    }
+    .calendar-day.checked {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .calendar-day.today {
+      font-weight: bold;
+      color: var(--text);
+      border: 1px solid var(--text-secondary);
+    }
+
+    /* === 通用按钮 === */
+    .control-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 28px;
+      border-radius: 22px;
+      cursor: pointer;
+      font-size: 13px;
+      letter-spacing: 2px;
+      transition: all 0.3s;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .control-btn.primary {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .control-btn.primary:hover {
+      background: rgba(201,168,124,0.2);
+    }
+
+    /* === 放空 === */
+    .clear-visual {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+    .clear-ring {
+      position: relative;
+      width: 260px;
+      height: 260px;
+    }
+    .clear-ring svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+    .clear-timer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 72px;
+      font-weight: 100;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+    }
+    .clear-hint {
+      margin-top: 32px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      letter-spacing: 3px;
+      text-align: center;
+      min-height: 22px;
+      transition: all 0.4s ease;
+    }
+    .clear-controls {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      padding: 20px 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* === 滚动条 === */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <div class="nav-bar">
+    <button class="nav-back" id="nav-back" style="visibility:hidden" onclick="showPage('home')">返回</button>
+    <div class="nav-title">正念</div>
+    <div class="nav-placeholder"></div>
+  </div>
+
+  <!-- 首页 -->
+  <div class="page active" id="page-home">
+    <div class="home-content">
+      <div class="quote-section">
+        <div class="quote-text" id="quote-text">呼吸是连接身体与心灵的桥梁。</div>
+        <div class="quote-author" id="quote-author">—— 一行禅师</div>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="streak-number">0</div>
+          <div class="stat-label">连续打卡</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="total-minutes">0</div>
+          <div class="stat-label">冥想分钟</div>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card" onclick="showPage('breath')">
+          <div class="card-icon">🌬️</div>
+          <div class="card-title">呼吸练习</div>
+          <div class="card-desc">跟随节奏深呼吸</div>
+        </div>
+        <div class="card" onclick="showPage('meditation')">
+          <div class="card-icon">🧘</div>
+          <div class="card-title">冥想计时</div>
+          <div class="card-desc">专注当下片刻</div>
+        </div>
+        <div class="card" onclick="showPage('mood')">
+          <div class="card-icon">🌿</div>
+          <div class="card-title">心情记录</div>
+          <div class="card-desc">觉察内心状态</div>
+        </div>
+        <div class="card" onclick="showPage('clear')">
+          <div class="card-icon">🫧</div>
+          <div class="card-title">放空</div>
+          <div class="card-desc">100秒清空大脑</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 呼吸练习 -->
+  <div class="page" id="page-breath">
+    <div class="breath-options">
+      <div class="breath-option active" data-mode="478" onclick="selectBreathMode('478')">
+        <div class="breath-option-name">4-7-8 呼吸</div>
+        <div class="breath-option-detail">吸气4 · 屏息7 · 呼气8</div>
+      </div>
+      <div class="breath-option" data-mode="box" onclick="selectBreathMode('box')">
+        <div class="breath-option-name">箱式呼吸</div>
+        <div class="breath-option-detail">吸4 · 屏4 · 呼4 · 屏4</div>
+      </div>
+    </div>
+
+    <div class="breath-visual">
+      <div class="breath-circle" id="breath-circle">
+        <div class="breath-circle-inner">
+          <div class="breath-label" id="breath-phase-label">准备</div>
+          <div class="breath-timer" id="breath-phase-timer">--</div>
+        </div>
+      </div>
+      <div class="breath-instruction" id="breath-instruction">选择一个呼吸法，开始练习</div>
+    </div>
+
+    <div class="breath-controls">
+      <button class="control-btn primary" id="breath-start-btn" onclick="startBreath()">开始</button>
+      <button class="control-btn" id="breath-stop-btn" style="display:none" onclick="stopBreath()">停止</button>
+    </div>
+  </div>
+
+  <!-- 冥想计时 -->
+  <div class="page" id="page-meditation">
+    <div class="meditation-setup" id="meditation-setup">
+      <div class="time-display" id="meditation-setup-time">05:00</div>
+      <div class="time-selector">
+        <button class="time-btn" data-min="3" onclick="selectMeditationTime(3)">3分</button>
+        <button class="time-btn active" data-min="5" onclick="selectMeditationTime(5)">5分</button>
+        <button class="time-btn" data-min="10" onclick="selectMeditationTime(10)">10分</button>
+        <button class="time-btn" data-min="15" onclick="selectMeditationTime(15)">15分</button>
+        <button class="time-btn" data-min="20" onclick="selectMeditationTime(20)">20分</button>
+        <button class="time-btn" data-min="30" onclick="selectMeditationTime(30)">30分</button>
+      </div>
+      <button class="control-btn primary" onclick="enterMeditation()">开始冥想</button>
+    </div>
+
+    <div class="meditation-timer-display" id="meditation-timer-display" style="display:none">
+      <div class="timer-ring">
+        <svg viewBox="0 0 240 240">
+          <circle class="timer-ring-bg" cx="120" cy="120" r="110"/>
+          <circle class="timer-ring-progress" id="meditation-progress" cx="120" cy="120" r="110"
+            stroke-dasharray="691" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-text" id="meditation-time">05:00</div>
+      </div>
+      <div class="timer-controls">
+        <button class="control-btn primary" id="meditation-toggle-btn" onclick="toggleMeditation()">开始</button>
+        <button class="control-btn" onclick="resetMeditation()">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 心情记录 -->
+  <div class="page" id="page-mood">
+    <div class="mood-section-title">今天感觉如何？</div>
+    <div class="mood-grid">
+      <div class="mood-item" onclick="selectMood(0)">
+        😊
+        <div class="mood-label">开心</div>
+      </div>
+      <div class="mood-item" onclick="selectMood(1)">
+        😐
+        <div class="mood-label">平静</div>
+      </div>
+      <div class="mood-item" onclick="selectMood(2)">
+        😔
+        <div class="mood-label">低落</div>
+      </div>
+      <div class="mood-item" onclick="selectMood(3)">
+        😰
+        <div class="mood-label">焦虑</div>
+      </div>
+      <div class="mood-item" onclick="selectMood(4)">
+        😴
+        <div class="mood-label">疲惫</div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-title">本月打卡</div>
+      <div class="stats-row">
+        <div>
+          <div class="streak-number" id="streak-number-mood">0</div>
+          <div class="streak-label">连续天数</div>
+        </div>
+        <div>
+          <div class="streak-number" id="total-minutes-mood">0</div>
+          <div class="streak-label">冥想分钟</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calendar-section">
+      <div class="stats-title">打卡日历</div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+
+  <!-- 放空 -->
+  <div class="page" id="page-clear">
+    <div class="clear-visual">
+      <div class="clear-ring">
+        <svg viewBox="0 0 260 260">
+          <circle class="timer-ring-bg" cx="130" cy="130" r="120"/>
+          <circle class="timer-ring-progress" id="clear-progress" cx="130" cy="130" r="120"
+            stroke-dasharray="754" stroke-dashoffset="0"/>
+        </svg>
+        <div class="clear-timer" id="clear-timer">100</div>
+      </div>
+      <div class="clear-hint" id="clear-hint">放空大脑，等待灵感浮现</div>
+    </div>
+    <div class="clear-controls">
+      <button class="control-btn primary" id="clear-start-btn" onclick="startClear()">开始放空</button>
+      <button class="control-btn" id="clear-idea-btn" style="display:none" onclick="ideaClear()">想到了</button>
+      <button class="control-btn primary" id="clear-restart-btn" style="display:none" onclick="restartClear()">重新开始</button>
+    </div>
+  </div>
+
+  <script>
+    // === 语录数据 ===
+    const quotes = [
+      { text: "呼吸是连接身体与心灵的桥梁。", author: "一行禅师" },
+      { text: "当下这一刻，就是我们所拥有的一切。", author: "埃克哈特·托利" },
+      { text: "你的内心就像一片天空，念头只是飘过的云。", author: "藏传佛教格言" },
+      { text: "不要为明天忧虑，因为明天自有明天的忧虑。", author: "《马太福音》" },
+      { text: "宁静不是无风无浪，而是在风浪中保持内心的安稳。", author: "佚名" },
+      { text: "每一次吸气都是新的开始，每一次呼气都是放下。", author: "佚名" },
+      { text: "正念意味着全然地活在当下，不带评判地觉察。", author: "乔·卡巴金" },
+      { text: "慢下来，你不是在追赶时间，你是在体验生命。", author: "佚名" },
+      { text: "真正的平静，来自接纳而非抗拒。", author: "佚名" },
+      { text: "停下来，深呼吸，回到此刻。", author: "佚名" },
+      { text: "观照你的呼吸，就像观照一条缓缓流淌的河流。", author: "佚名" },
+      { text: "心若不动，风又奈何。", author: "《菜根谭》" },
+      { text: "人生如逆旅，我亦是行人。", author: "苏轼" },
+      { text: "万物静观皆自得，四时佳兴与人同。", author: "程颢" },
+      { text: "非淡泊无以明志，非宁静无以致远。", author: "诸葛亮" }
+    ];
+
+    // === 状态 ===
+    let breathTimer = null;
+    let meditationInterval = null;
+    let meditationTime = 0;
+    let meditationTotal = 0;
+    let meditationRunning = false;
+    let selectedMood = null;
+    let currentBreathMode = '478';
+
+    // === 存储工具 ===
+    const storage = {
+      get(key, defaultValue) {
+        try {
+          if (typeof utools !== 'undefined') {
+            const val = utools.dbStorage.getItem(key);
+            return val !== null ? val : defaultValue;
+          }
+        } catch(e) {}
+        try {
+          const val = localStorage.getItem(key);
+          return val !== null ? JSON.parse(val) : defaultValue;
+        } catch(e) {
+          return defaultValue;
+        }
+      },
+      set(key, value) {
+        try {
+          if (typeof utools !== 'undefined') {
+            utools.dbStorage.setItem(key, value);
+            return;
+          }
+        } catch(e) {}
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch(e) {}
+      }
+    };
+
+    // === 路由 ===
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+
+      const backBtn = document.getElementById('nav-back');
+      backBtn.style.visibility = page === 'home' ? 'hidden' : 'visible';
+
+      stopBreath();
+      pauseMeditation();
+      stopClear();
+
+      if (page === 'home') {
+        loadQuote();
+        updateStreak();
+      } else if (page === 'mood') {
+        loadMoodData();
+      } else if (page === 'meditation') {
+        resetMeditationView();
+      } else if (page === 'breath') {
+        // already stopped
+      } else if (page === 'clear') {
+        restartClear();
+      }
+    }
+
+    // === 语录 ===
+    function loadQuote() {
+      const today = new Date().toDateString();
+      const savedDate = storage.get('mindfulness_quote_date', '');
+      let index = storage.get('mindfulness_quote_index', 0);
+
+      if (savedDate !== today) {
+        index = (index + 1) % quotes.length;
+        storage.set('mindfulness_quote_date', today);
+        storage.set('mindfulness_quote_index', index);
+      }
+
+      const q = quotes[index];
+      document.getElementById('quote-text').textContent = q.text;
+      document.getElementById('quote-author').textContent = '—— ' + q.author;
+    }
+
+    // === 呼吸练习 ===
+    const breathModes = {
+      '478': {
+        name: '4-7-8 呼吸',
+        detail: '吸气4秒 · 屏息7秒 · 呼气8秒',
+        phases: ['吸气', '屏息', '呼气'],
+        durations: [4, 7, 8]
+      },
+      'box': {
+        name: '箱式呼吸',
+        detail: '吸气4秒 · 屏息4秒 · 呼气4秒 · 屏息4秒',
+        phases: ['吸气', '屏息', '呼气', '屏息'],
+        durations: [4, 4, 4, 4]
+      }
+    };
+
+    function selectBreathMode(mode) {
+      currentBreathMode = mode;
+      document.querySelectorAll('.breath-option').forEach(el => {
+        el.classList.toggle('active', el.dataset.mode === mode);
+      });
+      stopBreath();
+    }
+
+    function startBreath() {
+      stopBreath();
+      const mode = breathModes[currentBreathMode];
+      let phaseIndex = 0;
+      let phaseTime = mode.durations[0];
+
+      const circle = document.getElementById('breath-circle');
+      const label = document.getElementById('breath-phase-label');
+      const timer = document.getElementById('breath-phase-timer');
+      const instruction = document.getElementById('breath-instruction');
+
+      instruction.textContent = mode.name + ' · 跟随圆圈的节奏';
+
+      function updatePhase() {
+        const phase = mode.phases[phaseIndex];
+        label.textContent = phase;
+        timer.textContent = phaseTime;
+
+        if (phase === '吸气') {
+          const progress = 1 - (phaseTime / mode.durations[phaseIndex]);
+          circle.style.transform = `scale(${1 + 0.35 * progress})`;
+          circle.style.boxShadow = `0 0 ${30 + 20 * progress}px rgba(201,168,124,${0.05 + 0.1 * progress})`;
+        } else if (phase === '呼气') {
+          const progress = 1 - (phaseTime / mode.durations[phaseIndex]);
+          circle.style.transform = `scale(${1.35 - 0.35 * progress})`;
+          circle.style.boxShadow = `0 0 ${50 - 20 * progress}px rgba(201,168,124,${0.15 - 0.1 * progress})`;
+        }
+      }
+
+      updatePhase();
+
+      breathTimer = setInterval(() => {
+        phaseTime--;
+        if (phaseTime <= 0) {
+          phaseIndex = (phaseIndex + 1) % mode.phases.length;
+          phaseTime = mode.durations[phaseIndex];
+        }
+        updatePhase();
+      }, 1000);
+
+      document.getElementById('breath-start-btn').style.display = 'none';
+      document.getElementById('breath-stop-btn').style.display = 'inline-block';
+    }
+
+    function stopBreath() {
+      if (breathTimer) {
+        clearInterval(breathTimer);
+        breathTimer = null;
+      }
+      document.getElementById('breath-circle').style.transform = 'scale(1)';
+      document.getElementById('breath-circle').style.boxShadow = '0 0 30px rgba(201,168,124,0.05)';
+      document.getElementById('breath-phase-label').textContent = '准备';
+      document.getElementById('breath-phase-timer').textContent = '--';
+      document.getElementById('breath-instruction').textContent = '选择一个呼吸法，开始练习';
+      document.getElementById('breath-start-btn').style.display = 'inline-block';
+      document.getElementById('breath-stop-btn').style.display = 'none';
+    }
+
+    // === 冥想计时器 ===
+    function selectMeditationTime(minutes) {
+      meditationTotal = minutes * 60;
+      meditationTime = meditationTotal;
+      updateMeditationSetupDisplay();
+      document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.min) === minutes);
+      });
+    }
+
+    function updateMeditationSetupDisplay() {
+      const m = Math.floor(meditationTime / 60).toString().padStart(2, '0');
+      const s = (meditationTime % 60).toString().padStart(2, '0');
+      document.getElementById('meditation-setup-time').textContent = `${m}:${s}`;
+    }
+
+    function enterMeditation() {
+      document.getElementById('meditation-setup').style.display = 'none';
+      document.getElementById('meditation-timer-display').style.display = 'flex';
+      updateMeditationDisplay();
+    }
+
+    function resetMeditationView() {
+      pauseMeditation();
+      meditationTime = meditationTotal;
+      document.getElementById('meditation-setup').style.display = 'flex';
+      document.getElementById('meditation-timer-display').style.display = 'none';
+      document.getElementById('meditation-toggle-btn').textContent = '开始';
+      updateMeditationSetupDisplay();
+    }
+
+    function updateMeditationDisplay() {
+      const m = Math.floor(meditationTime / 60).toString().padStart(2, '0');
+      const s = (meditationTime % 60).toString().padStart(2, '0');
+      document.getElementById('meditation-time').textContent = `${m}:${s}`;
+
+      const circle = document.getElementById('meditation-progress');
+      const circumference = 2 * Math.PI * 110;
+      circle.style.strokeDasharray = circumference;
+      if (meditationTotal > 0) {
+        const offset = circumference * (1 - meditationTime / meditationTotal);
+        circle.style.strokeDashoffset = offset;
+      }
+    }
+
+    function toggleMeditation() {
+      if (meditationRunning) {
+        pauseMeditation();
+      } else {
+        startMeditation();
+      }
+    }
+
+    function startMeditation() {
+      if (meditationTime <= 0) return;
+      meditationRunning = true;
+      document.getElementById('meditation-toggle-btn').textContent = '暂停';
+
+      meditationInterval = setInterval(() => {
+        meditationTime--;
+        updateMeditationDisplay();
+        if (meditationTime <= 0) {
+          finishMeditation();
+        }
+      }, 1000);
+    }
+
+    function pauseMeditation() {
+      meditationRunning = false;
+      clearInterval(meditationInterval);
+      document.getElementById('meditation-toggle-btn').textContent = '继续';
+    }
+
+    let audioCtx = null;
+
+    function playReminder() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.frequency.value = 528;
+        osc.type = 'sine';
+        gain.gain.value = 0.15;
+
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+        osc.stop(audioCtx.currentTime + 1.2);
+      } catch (e) {}
+    }
+
+    function finishMeditation() {
+      pauseMeditation();
+      const elapsed = meditationTotal - meditationTime;
+      if (elapsed > 0) {
+        const totalSeconds = storage.get('mindfulness_total_seconds', 0);
+        storage.set('mindfulness_total_seconds', totalSeconds + elapsed);
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const moods = storage.get('mindfulness_moods', {});
+      if (moods[today] === undefined) {
+        moods[today] = 1;
+        storage.set('mindfulness_moods', moods);
+      }
+
+      document.getElementById('meditation-toggle-btn').textContent = '已完成';
+      playReminder();
+      setTimeout(() => {
+        showPage('home');
+      }, 1500);
+    }
+
+    function resetMeditation() {
+      pauseMeditation();
+      meditationTime = meditationTotal;
+      updateMeditationDisplay();
+      document.getElementById('meditation-toggle-btn').textContent = '开始';
+    }
+
+    // === 放空 ===
+    let clearIntervalId = null;
+    let clearTime = 100;
+    let clearTotal = 100;
+    let clearRunning = false;
+
+    function startClear() {
+      stopClear();
+      clearTime = clearTotal;
+      clearRunning = true;
+      document.getElementById('clear-start-btn').style.display = 'none';
+      document.getElementById('clear-idea-btn').style.display = 'inline-block';
+      document.getElementById('clear-restart-btn').style.display = 'none';
+      document.getElementById('clear-hint').textContent = '放空大脑，等待灵感浮现';
+
+      updateClearDisplay();
+
+      clearIntervalId = setInterval(() => {
+        clearTime--;
+        updateClearDisplay();
+        if (clearTime <= 0) {
+          finishClear();
+        }
+      }, 1000);
+    }
+
+    function ideaClear() {
+      stopClear();
+      document.getElementById('clear-start-btn').style.display = 'none';
+      document.getElementById('clear-idea-btn').style.display = 'none';
+      document.getElementById('clear-restart-btn').style.display = 'inline-block';
+      document.getElementById('clear-hint').textContent = '那就去做吧，做完再回来';
+    }
+
+    function finishClear() {
+      stopClear();
+      document.getElementById('clear-start-btn').style.display = 'none';
+      document.getElementById('clear-idea-btn').style.display = 'none';
+      document.getElementById('clear-restart-btn').style.display = 'inline-block';
+      document.getElementById('clear-hint').textContent = '时间到了，有想法就去做吧';
+
+      const today = new Date().toISOString().split('T')[0];
+      const moods = storage.get('mindfulness_moods', {});
+      if (moods[today] === undefined) {
+        moods[today] = 1;
+        storage.set('mindfulness_moods', moods);
+      }
+
+      playReminder();
+    }
+
+    function restartClear() {
+      stopClear();
+      clearTime = clearTotal;
+      updateClearDisplay();
+      document.getElementById('clear-start-btn').style.display = 'inline-block';
+      document.getElementById('clear-idea-btn').style.display = 'none';
+      document.getElementById('clear-restart-btn').style.display = 'none';
+      document.getElementById('clear-hint').textContent = '放空大脑，等待灵感浮现';
+    }
+
+    function stopClear() {
+      clearRunning = false;
+      if (clearIntervalId) {
+        clearInterval(clearIntervalId);
+        clearIntervalId = null;
+      }
+    }
+
+    function updateClearDisplay() {
+      document.getElementById('clear-timer').textContent = clearTime;
+
+      const circle = document.getElementById('clear-progress');
+      const circumference = 2 * Math.PI * 120;
+      circle.style.strokeDasharray = circumference;
+      if (clearTotal > 0) {
+        const offset = circumference * (1 - clearTime / clearTotal);
+        circle.style.strokeDashoffset = offset;
+      }
+    }
+
+    // === 心情记录 ===
+    function selectMood(index) {
+      selectedMood = index;
+      document.querySelectorAll('.mood-item').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+      const data = storage.get('mindfulness_moods', {});
+      data[today] = index;
+      storage.set('mindfulness_moods', data);
+
+      updateStreak();
+      renderCalendar();
+    }
+
+    function loadMoodData() {
+      const today = new Date().toISOString().split('T')[0];
+      const data = storage.get('mindfulness_moods', {});
+      const todayMood = data[today];
+
+      selectedMood = todayMood !== undefined ? todayMood : null;
+      document.querySelectorAll('.mood-item').forEach((el, i) => {
+        el.classList.toggle('selected', i === selectedMood);
+      });
+
+      updateStreak();
+      renderCalendar();
+    }
+
+    function updateStreak() {
+      const data = storage.get('mindfulness_moods', {});
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      let streak = 0;
+      let checkDate = new Date(today);
+      if (data[todayStr] === undefined) {
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+
+      while (true) {
+        const str = checkDate.toISOString().split('T')[0];
+        if (data[str] !== undefined) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      document.getElementById('streak-number').textContent = streak;
+      document.getElementById('streak-number-mood').textContent = streak;
+
+      const totalSeconds = storage.get('mindfulness_total_seconds', 0);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      document.getElementById('total-minutes').textContent = totalMinutes;
+      document.getElementById('total-minutes-mood').textContent = totalMinutes;
+    }
+
+    function renderCalendar() {
+      const data = storage.get('mindfulness_moods', {});
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+
+      const days = ['日', '一', '二', '三', '四', '五', '六'];
+      days.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'calendar-day weekday';
+        el.textContent = d;
+        grid.appendChild(el);
+      });
+
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.appendChild(document.createElement('div'));
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const el = document.createElement('div');
+        el.className = 'calendar-day';
+        el.textContent = d;
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        if (data[dateStr] !== undefined) {
+          el.classList.add('checked');
+        }
+        if (d === today.getDate()) {
+          el.classList.add('today');
+        }
+
+        grid.appendChild(el);
+      }
+    }
+
+    // === 初始化 ===
+    document.addEventListener('DOMContentLoaded', () => {
+      loadQuote();
+      updateStreak();
+      selectBreathMode('478');
+      selectMeditationTime(5);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "main": "index.html",
+  "logo": "logo.png",
+  "pluginSetting": {
+    "single": true,
+    "height": 600
+  },
+  "features": [
+    {
+      "code": "mindfulness",
+      "explain": "正念冥想 - 呼吸练习、冥想计时、心情记录",
+      "cmds": ["正念", "冥想", "呼吸", "静心", "mindfulness"]
+    }
+  ]
+}
